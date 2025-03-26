@@ -22,8 +22,8 @@ export default function StoryPage({ params }: { params: { id: string } }) {
         }
         const data = await response.json();
         setStory(data);
-      } catch (err) {
-        setError('Failed to load story. Please try again later.');
+      } catch (error) {
+        setError('Failed to load story');
       } finally {
         setIsLoading(false);
       }

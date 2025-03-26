@@ -23,9 +23,6 @@ export async function GET(
 
     return NextResponse.json(story);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch story' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch story' }, { status: 500 });
   }
 } 

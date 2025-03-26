@@ -39,20 +39,17 @@ export default function Home() {
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
+  const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set());
   const [upvotedStories, setUpvotedStories] = useState<Set<number>>(new Set());
 
   const fetchStories = async () => {
     try {
       const response = await fetch('/api/stories');
-      if (!response.ok) {
-        throw new Error('Failed to fetch stories');
-      }
+      if (!response.ok) throw new Error('Failed to fetch stories');
       const data = await response.json();
       setStories(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch stories');
+      setError('Failed to load stories');
     } finally {
       setIsLoading(false);
     }
@@ -64,33 +61,47 @@ export default function Home() {
 
   const handleUpvote = async (storyId: number) => {
     if (upvotedStories.has(storyId)) return;
-
+    
     try {
       const response = await fetch(`/api/stories/${storyId}/upvote`, {
         method: 'POST',
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to upvote story');
-      }
-
+      
+      if (!response.ok) throw new Error('Failed to upvote');
+      
       const updatedStory = await response.json();
       setStories(stories.map(story => 
         story.id === storyId ? updatedStory : story
       ));
-      setUpvotedStories(prev => new Set([...prev, storyId]));
+      setUpvotedStories(prev => new Set(prev).add(storyId));
     } catch (err) {
-      console.error('Error upvoting story:', err);
+      console.error('Failed to upvote:', err);
     }
   };
 
-  const filteredStories = stories.filter(story => {
-    const matchesSearch = searchQuery === '' || 
-      story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.content.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTheme = !selectedTheme || story.theme === selectedTheme;
-    return matchesSearch && matchesTheme;
-  });
+  const filteredStories = stories.filter(story => 
+    selectedThemes.size === 0 || selectedThemes.has(story.theme)
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">Loading stories...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center text-red-600">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   const storiesByTheme = filteredStories.reduce((acc, story) => {
     if (!acc[story.theme]) {
@@ -124,9 +135,9 @@ export default function Home() {
             {Object.entries(themeLabels).map(([theme, label]) => (
               <button
                 key={theme}
-                onClick={() => setSelectedTheme(theme as Theme)}
+                onClick={() => setSelectedThemes(prev => new Set(prev).add(theme))}
                 className={`group relative overflow-hidden rounded-xl p-4 text-center transition-all hover:scale-105 ${
-                  selectedTheme === theme 
+                  selectedThemes.has(theme) 
                     ? 'ring-2 ring-[#2348B1] ring-offset-2' 
                     : ''
                 } ${themeGradients[theme as Theme]}`}
@@ -136,9 +147,9 @@ export default function Home() {
               </button>
             ))}
             <button
-              onClick={() => setSelectedTheme(null)}
+              onClick={() => setSelectedThemes(new Set())}
               className={`group relative overflow-hidden rounded-xl p-4 text-center transition-all hover:scale-105 ${
-                selectedTheme === null 
+                selectedThemes.size === 0 
                   ? 'ring-2 ring-[#2348B1] ring-offset-2' 
                   : ''
               } bg-gray-100 hover:bg-gray-200`}
@@ -151,11 +162,7 @@ export default function Home() {
 
       {/* Stories Section */}
       <div className="max-w-6xl mx-auto px-4 py-16">
-        {isLoading ? (
-          <div className="text-center py-8">Loading stories...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
-        ) : stories.length === 0 ? (
+        {stories.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No stories yet. Be the first to share!</div>
         ) : filteredStories.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No stories found matching your search.</div>
