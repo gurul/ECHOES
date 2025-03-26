@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const story = await prisma.story.findUnique({
       where: {
-        id: parseInt(params.id),
+        id: parseInt(context.params.id),
       },
     });
 
