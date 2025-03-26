@@ -48,7 +48,7 @@ export default function Home() {
       if (!response.ok) throw new Error('Failed to fetch stories');
       const data = await response.json();
       setStories(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load stories');
     } finally {
       setIsLoading(false);
@@ -74,8 +74,8 @@ export default function Home() {
         story.id === storyId ? updatedStory : story
       ));
       setUpvotedStories(prev => new Set(prev).add(storyId));
-    } catch (err) {
-      console.error('Failed to upvote:', err);
+    } catch {
+      console.error('Failed to upvote');
     }
   };
 
@@ -102,14 +102,6 @@ export default function Home() {
       </div>
     );
   }
-
-  const storiesByTheme = filteredStories.reduce((acc, story) => {
-    if (!acc[story.theme]) {
-      acc[story.theme] = [];
-    }
-    acc[story.theme].push(story);
-    return acc;
-  }, {} as Record<Theme, Story[]>);
 
   return (
     <main className="min-h-screen bg-white">

@@ -22,7 +22,7 @@ export default function StoryPage({ params }: { params: { id: string } }) {
         }
         const data = await response.json();
         setStory(data);
-      } catch (error) {
+      } catch {
         setError('Failed to load story');
       } finally {
         setIsLoading(false);

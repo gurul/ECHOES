@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { themeGradients } from '../utils/themes';
+import { FormEvent } from 'react';
 
 interface StoryFormProps {
   onSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
