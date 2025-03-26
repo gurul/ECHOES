@@ -48,11 +48,10 @@ Weekly questions prompt both younger and older users to reflect on universal hum
 
 ## 👥 Contributing
 
-We welcome contributions from developers, designers, writers, and anyone passionate about preserving generational wisdom. See our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
+We welcome contributions from developers, designers, writers, and anyone passionate about preserving generational wisdom.
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License,
 
 ## 🤝 Acknowledgements
 
