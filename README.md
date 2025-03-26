@@ -28,9 +28,9 @@ Weekly questions prompt both younger and older users to reflect on universal hum
 
 ## 💻 Technical Stack
 
-- **Frontend**: React.js with Tailwind CSS
-- **Backend**: Node.js with Express
-- **Database**: Prisma
+- **Frontend**: Next.js, TypeScript, Tailwind CSS
+- **Backend**: Next.js, Prisma
+- **Database**: PostgreSQL
 - **Hosting**: Vercel
 
 ## 📋 Development Roadmap
