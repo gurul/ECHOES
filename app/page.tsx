@@ -127,7 +127,15 @@ export default function Home() {
             {Object.entries(themeLabels).map(([theme, label]) => (
               <button
                 key={theme}
-                onClick={() => setSelectedThemes(prev => new Set(prev).add(theme))}
+                onClick={() => {
+                  const newThemes = new Set(selectedThemes);
+                  if (newThemes.has(theme)) {
+                    newThemes.delete(theme);
+                  } else {
+                    newThemes.add(theme);
+                  }
+                  setSelectedThemes(newThemes);
+                }}
                 className={`group relative overflow-hidden rounded-xl p-4 text-center transition-all hover:scale-105 ${
                   selectedThemes.has(theme) 
                     ? 'ring-2 ring-[#2348B1] ring-offset-2' 
