@@ -38,17 +38,13 @@ Weekly questions prompt both younger and older users to reflect on universal hum
 ### Phase 1: MVP Launch (Current Phase)
 - Core story submission and browsing functionality
 - Basic thematic collections
-- User profiles and authentication
 
-### Phase 2: Community Features
-- Community Circles implementation
-- Direct messaging between users
+### Phase 2: Upgrade
 - Enhanced media support (audio recordings, photo galleries)
 
 ### Phase 3: Preservation Tools
 - Interview guide generator
 - Mobile recording app
-- Family tree integration
 
 ## 👥 Contributing
 
