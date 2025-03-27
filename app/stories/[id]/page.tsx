@@ -77,7 +77,7 @@ export default function StoryPage({
             <span>•</span>
             <span>{story.votes} votes</span>
           </div>
-          <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+          <div className="text-gray-800 leading-relaxed whitespace-pre-wrap font-mono">
             {story.content}
           </div>
         </article>
