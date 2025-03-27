@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Theme, themeGradients, themeLabels } from './utils/themes';
+import { Theme, themeGradients } from './utils/themes';
 
 interface Story {
   id: number;
