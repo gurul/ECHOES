@@ -4,85 +4,92 @@ import Link from 'next/link';
 
 interface Story {
   id: number;
+  title: string;
   content: string;
+  theme: string;
+  votes: number;
   createdAt: string;
 }
 
-export default function StoryPage({ params }: { params: { id: string } }) {
+export default function StoryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const [story, setStory] = useState<Story | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStory = async () => {
       try {
-        const response = await fetch(`/api/stories/${params.id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch story');
-        }
+        const { id } = await params;
+        const response = await fetch(`/api/stories/${id}`);
+        if (!response.ok) throw new Error('Failed to fetch story');
         const data = await response.json();
         setStory(data);
-      } catch {
-        setError('Failed to load story');
-      } finally {
-        setIsLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch story');
       }
     };
 
     fetchStory();
-  }, [params.id]);
+  }, [params]);
 
-  if (isLoading) {
+  if (error) {
     return (
-      <main className="min-h-screen bg-gray-50 py-16">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="text-center">Loading story...</div>
+      <div className="min-h-screen bg-white py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center text-red-600">{error}</div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/"
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              ← Back to Home
+            </Link>
+          </div>
         </div>
-      </main>
+      </div>
     );
   }
 
-  if (error || !story) {
+  if (!story) {
     return (
-      <main className="min-h-screen bg-gray-50 py-16">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="text-center text-red-500">{error || 'Story not found'}</div>
+      <div className="min-h-screen bg-white py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <Link 
-            href="/"
-            className="inline-flex items-center text-[#2348B1] mb-8 hover:text-[#1a3a8f]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2"
-            >
-              <path d="m19 12-7-7-7 7"/>
-              <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
-            </svg>
-            Back to Stories
-          </Link>
-          <p className="text-gray-800 leading-relaxed text-lg">{story.content}</p>
-          <div className="mt-8 text-sm text-gray-500">
-            Shared on {new Date(story.createdAt).toLocaleDateString()}
+    <div className="min-h-screen bg-white py-16">
+      <div className="max-w-4xl mx-auto px-4">
+        <article className="prose lg:prose-xl mx-auto">
+          <h1 className="text-4xl font-bold text-gray-900 mb-8">{story.title}</h1>
+          <div className="flex items-center gap-4 text-sm text-gray-600 mb-8">
+            <span>Theme: {story.theme}</span>
+            <span>•</span>
+            <span>{new Date(story.createdAt).toLocaleDateString()}</span>
+            <span>•</span>
+            <span>{story.votes} votes</span>
           </div>
+          <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+            {story.content}
+          </div>
+        </article>
+        <div className="mt-12 text-center">
+          <Link
+            href="/"
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            ← Back to Home
+          </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 } 
