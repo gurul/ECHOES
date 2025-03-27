@@ -18,7 +18,7 @@ export default function ShareStory() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const story = {
+    const data = {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
       theme: formData.get('theme') as Theme,
@@ -30,11 +30,12 @@ export default function ShareStory() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(story),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit story');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create story');
       }
 
       setSuccess(true);
@@ -42,14 +43,14 @@ export default function ShareStory() {
         router.push('/');
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit story');
+      setError(err instanceof Error ? err.message : 'Failed to create story');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-gray-50 py-16">
       {/* Back Button */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <Link 
@@ -76,7 +77,7 @@ export default function ShareStory() {
       {/* Header */}
       <header className="bg-gray-900 text-white py-8">
         <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center">Share Your Story</h1>
+          <h1 className="text-4xl font-bold text-center animate-fade-in">Share Your Story</h1>
           <p className="text-gray-300 text-center mt-4">
             Inspire others with your unique experience
           </p>
@@ -92,11 +93,20 @@ export default function ShareStory() {
             <p className="text-gray-900">Redirecting you back to home...</p>
           </div>
         ) : (
-          <StoryForm 
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            error={error}
-          />
+          <>
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg animate-scale-in">
+                <p className="text-red-600">{error}</p>
+              </div>
+            )}
+            <div className="animate-slide-up">
+              <StoryForm 
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+                error={error}
+              />
+            </div>
+          </>
         )}
       </div>
     </main>
