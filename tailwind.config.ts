@@ -44,6 +44,16 @@ const config: Config = {
           '100%': { transform: 'scale(0.95)', opacity: '0' },
         },
       },
+      perspective: {
+        '1000': '1000px',
+      },
+      rotate: {
+        'y-6': 'rotateY(6deg)',
+        'x-2': 'rotateX(2deg)',
+      },
+      translate: {
+        'z-8': 'translateZ(8px)',
+      },
     },
   },
   plugins: [],

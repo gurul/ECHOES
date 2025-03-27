@@ -1,14 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { filterContent } from '../../utils/contentFilter';
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+const prisma = new PrismaClient();
 
 export async function GET() {
   try {
@@ -30,27 +23,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { title, content, theme } = body;
+    const { title, content, theme } = await request.json();
 
-    // Validate required fields
     if (!title || !content || !theme) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Title, content, and theme are required' },
         { status: 400 }
       );
     }
 
-    // Filter content
-    const filterResult = filterContent(content);
-    if (!filterResult.isValid) {
-      return NextResponse.json(
-        { error: filterResult.reason },
-        { status: 400 }
-      );
-    }
-
-    // Create new story
     const story = await prisma.story.create({
       data: {
         title,

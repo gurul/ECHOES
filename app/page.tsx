@@ -138,14 +138,16 @@ export default function Home() {
                   }
                   setSelectedThemes(newThemes);
                 }}
-                className={`group relative overflow-hidden rounded-xl p-4 text-center transition-all hover:scale-105 animate-scale-in ${
+                className={`group relative overflow-hidden rounded-xl p-4 text-center transition-all hover:scale-105 animate-scale-in shadow-lg hover:shadow-xl ${
                   selectedThemes.has(theme) 
-                    ? 'ring-2 ring-[#2348B1] ring-offset-2' 
+                    ? 'ring-4 ring-blue-500 ring-offset-2 bg-blue-500/10' 
                     : ''
                 }`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-50 group-hover:opacity-75 transition-opacity`} />
-                <span className="relative text-gray-900 font-medium capitalize">
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90 group-hover:opacity-100 transition-opacity`} />
+                <span className={`relative font-semibold capitalize drop-shadow-md ${
+                  selectedThemes.has(theme) ? 'text-white' : 'text-white'
+                }`}>
                   {theme}
                 </span>
               </button>
@@ -167,43 +169,50 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story, index) => (
-              <div key={story.id} className="relative animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+              <div 
+                key={story.id} 
+                className="relative animate-slide-up perspective-1000" 
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 <Link 
                   href={`/stories/${story.id}`}
-                  className={`block rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 bg-gradient-to-br h-[280px] flex flex-col ${themeGradients[story.theme]}`}
+                  className={`group block rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 bg-gradient-to-br backdrop-blur-sm h-[280px] flex flex-col transform-gpu hover:scale-105 hover:rotate-y-6 hover:rotate-x-2 ${themeGradients[story.theme]}`}
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{story.title}</h3>
-                  <p className="text-gray-900 leading-snug font-medium flex-grow line-clamp-4">{getSummary(story.content)}</p>
-                  <div className="mt-4 text-sm text-gray-700 font-medium">
-                    Read more →
+                  <div className="bg-white/90 rounded-lg p-4 flex-grow transform-gpu transition-transform duration-300 group-hover:translate-z-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{story.title}</h3>
+                    <p className="text-gray-700 leading-snug font-medium line-clamp-4">{getSummary(story.content)}</p>
+                    <div className="mt-4 text-sm font-medium text-gray-900">
+                      Read more →
+                    </div>
                   </div>
                 </Link>
-                <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-full animate-float">
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md animate-float">
                   <button
-                    onClick={() => handleUpvote(story.id)}
-                    className={`transition-colors ${
-                      upvotedStories.has(story.id)
-                        ? 'text-[#2348B1]'
-                        : 'text-gray-600 hover:text-[#2348B1]'
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleUpvote(story.id);
+                    }}
+                    className={`flex items-center space-x-1 ${
+                      upvotedStories.has(story.id) ? 'text-blue-600' : 'text-gray-700'
                     }`}
-                    title="Upvote story"
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
+                      className={`w-5 h-5 transform transition-transform ${
+                        upvotedStories.has(story.id) ? 'scale-110' : ''
+                      }`}
+                      fill={upvotedStories.has(story.id) ? "currentColor" : "none"}
                       stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      viewBox="0 0 24 24"
                     >
-                      <path d="m12 19 7-7-7-7" />
-                      <path d="M12 19V5" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                      />
                     </svg>
+                    <span>{story.votes}</span>
                   </button>
-                  <span className="text-sm font-medium text-gray-700">{story.votes} votes</span>
                 </div>
               </div>
             ))}

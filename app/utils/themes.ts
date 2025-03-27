@@ -1,12 +1,12 @@
 export type Theme = 'resilience' | 'love' | 'adventure' | 'wisdom' | 'family' | 'courage';
 
-export const themeGradients: Record<Theme, string> = {
-  resilience: 'from-blue-50 via-indigo-50 to-purple-50',
-  love: 'from-pink-50 via-rose-50 to-red-50',
-  adventure: 'from-emerald-50 via-teal-50 to-green-50',
-  wisdom: 'from-amber-50 via-yellow-50 to-orange-50',
-  family: 'from-cyan-50 via-blue-50 to-indigo-50',
-  courage: 'from-red-50 via-orange-50 to-amber-50',
+export const themeGradients: Record<string, string> = {
+  resilience: 'from-blue-500 via-indigo-500 to-violet-500',
+  love: 'from-rose-500 via-pink-500 to-red-500',
+  adventure: 'from-amber-500 via-orange-500 to-yellow-500',
+  wisdom: 'from-emerald-500 via-teal-500 to-cyan-500',
+  family: 'from-fuchsia-500 via-purple-500 to-pink-500',
+  courage: 'from-red-500 via-orange-500 to-amber-500',
 };
 
 export const themeLabels: Record<Theme, string> = {
