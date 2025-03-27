@@ -8,6 +8,7 @@ interface Story {
   id: number;
   title: string;
   content: string;
+  summary?: string;
   theme: Theme;
   votes: number;
   createdAt: string;
@@ -41,10 +42,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set());
   const [upvotedStories, setUpvotedStories] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
 
-  const fetchStories = async () => {
+  const fetchStories = async (query: string = '') => {
     try {
-      const response = await fetch('/api/stories');
+      setIsLoading(true);
+      const url = query ? `/api/stories?q=${encodeURIComponent(query)}` : '/api/stories';
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch stories');
       const data = await response.json();
       setStories(data);
@@ -55,9 +60,18 @@ export default function Home() {
     }
   };
 
+  // Debounce search query
   useEffect(() => {
-    fetchStories();
-  }, []);
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchStories(debouncedSearchQuery);
+  }, [debouncedSearchQuery]);
 
   const handleUpvote = async (storyId: number) => {
     if (upvotedStories.has(storyId)) return;
@@ -110,12 +124,60 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-4">ECHOES</h1>
           <p className="text-xl text-white/90 mb-8">Voices of the past, conversations for tomorrow</p>
-          <Link 
-            href="/share" 
-            className="inline-block bg-white text-[#2348B1] px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-          >
-            Share Your Story
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <div className="relative w-full max-w-md">
+              <input
+                type="text"
+                placeholder="Search stories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pl-10 rounded-lg text-gray-900 border-2 border-blue-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={isLoading && debouncedSearchQuery === searchQuery}
+              />
+              {isLoading && debouncedSearchQuery === searchQuery ? (
+                <svg 
+                  className="absolute left-3 top-3.5 w-5 h-5 text-blue-500 animate-spin" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24"
+                >
+                  <circle 
+                    className="opacity-25" 
+                    cx="12" 
+                    cy="12" 
+                    r="10" 
+                    stroke="currentColor" 
+                    strokeWidth="4"
+                  ></circle>
+                  <path 
+                    className="opacity-75" 
+                    fill="currentColor" 
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                <svg
+                  className="absolute left-3 top-3.5 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              )}
+            </div>
+            <Link 
+              href="/share" 
+              className="inline-block bg-white text-[#2348B1] px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors w-full sm:w-auto"
+            >
+              Share Your Story
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -158,13 +220,28 @@ export default function Home() {
 
       {/* Stories Section */}
       <div className="max-w-6xl mx-auto px-4 py-16">
+        {debouncedSearchQuery && (
+          <div className="mb-8 text-center">
+            <span className="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+              {filteredStories.length} {filteredStories.length === 1 ? 'result' : 'results'} for &ldquo;{debouncedSearchQuery}&rdquo;
+            </span>
+            {debouncedSearchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="ml-2 text-sm text-gray-600 hover:text-gray-900 underline"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
+        )}
         {stories.length === 0 ? (
           <div className="text-center py-8 text-gray-500 animate-fade-in">
             No stories yet. Be the first to share!
           </div>
         ) : filteredStories.length === 0 ? (
           <div className="text-center py-8 text-gray-500 animate-fade-in">
-            No stories found for the selected themes.
+            {debouncedSearchQuery ? `No stories found matching &ldquo;${debouncedSearchQuery}&rdquo;` : 'No stories found for the selected themes.'}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -180,7 +257,7 @@ export default function Home() {
                 >
                   <div className="bg-white/90 rounded-lg p-4 flex-grow transform-gpu transition-transform duration-300 group-hover:translate-z-8">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{story.title}</h3>
-                    <p className="text-gray-700 leading-snug font-medium line-clamp-4">{getSummary(story.content)}</p>
+                    <p className="text-gray-700 leading-snug font-medium line-clamp-4">{story.summary || getSummary(story.content)}</p>
                     <div className="mt-4 text-sm font-medium text-gray-900">
                       Read more →
                     </div>

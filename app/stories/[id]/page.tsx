@@ -6,6 +6,7 @@ interface Story {
   id: number;
   title: string;
   content: string;
+  summary?: string;
   theme: string;
   votes: number;
   createdAt: string;
