@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import supabase from '../../../../../supabaseClient';
 
 export async function POST(
   request: NextRequest,
@@ -7,18 +7,22 @@ export async function POST(
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
-    const story = await prisma.story.update({
-      where: {
-        id: parseInt(id),
-      },
-      data: {
-        votes: {
-          increment: 1,
-        },
-      },
-    });
-
-    return NextResponse.json(story);
+    // Fetch current votes
+    const { data: story, error: fetchError } = await supabase
+      .from('Story')
+      .select('votes')
+      .eq('id', parseInt(id))
+      .single();
+    if (fetchError || !story) throw fetchError || new Error('Story not found');
+    // Increment votes
+    const { data: updatedStory, error: updateError } = await supabase
+      .from('Story')
+      .update({ votes: story.votes + 1 })
+      .eq('id', parseInt(id))
+      .select()
+      .single();
+    if (updateError) throw updateError;
+    return NextResponse.json(updatedStory);
   } catch (error) {
     console.error('Error upvoting story:', error);
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import supabase from '../../../../supabaseClient';
 
 export async function GET(
   request: NextRequest,
@@ -7,12 +7,13 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
-    const story = await prisma.story.findUnique({
-      where: {
-        id: parseInt(id),
-      },
-    });
+    const { data: story, error } = await supabase
+      .from('Story')
+      .select('*')
+      .eq('id', parseInt(id))
+      .single();
 
+    if (error) throw error;
     if (!story) {
       return NextResponse.json(
         { error: 'Story not found' },

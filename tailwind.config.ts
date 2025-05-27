@@ -13,10 +13,15 @@ const config: Config = {
         'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.5s ease-out',
         'bounce-slow': 'bounce 3s infinite',
-        'pulse-slow': 'pulse 3s infinite',
         'float': 'float 3s ease-in-out infinite',
         'scale-in': 'scaleIn 0.3s ease-out',
         'scale-out': 'scaleOut 0.3s ease-in',
+        shimmer: 'shimmer 3s infinite',
+        'wave-slow': 'wave-slow 8s infinite',
+        'wave-slower': 'wave-slower 12s infinite',
+        'wave-fast': 'wave-fast 6s infinite',
+        'pulse-slow': 'pulse-slow 4s infinite',
+        'falling-star': 'fallingStar 3s linear infinite'
       },
       keyframes: {
         fadeIn: {
@@ -32,8 +37,10 @@ const config: Config = {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '0%, 100%': { transform: 'translateY(0) translateX(0)' },
+          '25%': { transform: 'translateY(-10px) translateX(5px)' },
+          '50%': { transform: 'translateY(0) translateX(10px)' },
+          '75%': { transform: 'translateY(10px) translateX(5px)' }
         },
         scaleIn: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
@@ -43,6 +50,42 @@ const config: Config = {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(0.95)', opacity: '0' },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
+        },
+        'wave-slow': {
+          '0%': { transform: 'translateX(-100%) translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateX(0) translateY(-10%) rotate(5deg)' },
+          '100%': { transform: 'translateX(100%) translateY(0) rotate(0deg)' }
+        },
+        'wave-slower': {
+          '0%': { transform: 'translateX(-100%) translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateX(0) translateY(10%) rotate(-5deg)' },
+          '100%': { transform: 'translateX(100%) translateY(0) rotate(0deg)' }
+        },
+        'wave-fast': {
+          '0%': { transform: 'translateX(-100%) translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateX(0) translateY(-5%) rotate(3deg)' },
+          '100%': { transform: 'translateX(100%) translateY(0) rotate(0deg)' }
+        },
+        'pulse-slow': {
+          '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+          '50%': { opacity: '0.5', transform: 'scale(1.1)' }
+        },
+        fallingStar: {
+          '0%': { 
+            transform: 'translateY(0) translateX(0) rotate(45deg)',
+            opacity: '0'
+          },
+          '5%': { 
+            opacity: '1'
+          },
+          '100%': { 
+            transform: 'translateY(100vh) translateX(100px) rotate(45deg)',
+            opacity: '0'
+          }
+        }
       },
       perspective: {
         '1000': '1000px',

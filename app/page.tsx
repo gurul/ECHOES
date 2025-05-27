@@ -120,10 +120,20 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#2348B1] to-[#1a3a8f] text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4">ECHOES</h1>
-          <p className="text-xl text-white/90 mb-8">Voices of the past, conversations for tomorrow</p>
+      <div className="bg-gradient-to-br from-[#2348B1] to-[#1a3a8f] text-white py-16 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 animate-fade-in relative">
+            <span className="relative inline-block">
+              ECHOES
+              <span className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-xl animate-pulse-slow"></span>
+            </span>
+          </h1>
+          <p className="text-xl text-white/90 mb-8 relative">
+            <span className="relative inline-block">
+              Voices of the past, conversations for tomorrow
+              <span className="absolute -inset-1 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 blur-lg animate-pulse-slow"></span>
+            </span>
+          </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <div className="relative w-full max-w-md">
               <input

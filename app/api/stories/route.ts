@@ -1,25 +1,22 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import supabase from '../../../supabaseClient';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get('q');
-    
-    const stories = await prisma.story.findMany({
-      where: searchQuery ? {
-        OR: [
-          { title: { contains: searchQuery } },
-          { content: { contains: searchQuery } }
-        ]
-      } : undefined,
-      orderBy: [
-        { votes: 'desc' },
-        { createdAt: 'desc' }
-      ],
-    });
+    let query = supabase
+      .from('Story')
+      .select('*')
+      .order('votes', { ascending: false })
+      .order('createdAt', { ascending: false });
+
+    if (searchQuery) {
+      query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+    }
+
+    const { data: stories, error } = await query;
+    if (error) throw error;
     return NextResponse.json(stories);
   } catch (error) {
     console.error('Error fetching stories:', error);
@@ -65,17 +62,18 @@ export async function POST(request: Request) {
 
     const summary = generateSummary(content);
 
-    const story = await prisma.story.create({
-      data: {
+    const { data, error } = await supabase.from('Story').insert([
+      {
         title,
         content,
         summary,
         theme,
         votes: 0,
       },
-    });
+    ]).select().single();
 
-    return NextResponse.json(story);
+    if (error) throw error;
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error creating story:', error);
     return NextResponse.json(
