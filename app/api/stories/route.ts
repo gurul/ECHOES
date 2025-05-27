@@ -49,6 +49,9 @@ function generateSummary(content: string): string {
   return summary.trim() + '...';
 }
 
+// Use environment variable, fallback to localhost for dev
+const summarizerUrl = process.env.SUMMARIZER_URL || 'http://localhost:8000/summarize';
+
 export async function POST(request: Request) {
   try {
     const { title, content, theme } = await request.json();
@@ -60,7 +63,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const summary = generateSummary(content);
+    // Call the FastAPI summarizer
+    let summary = '';
+    try {
+      const res = await fetch(summarizerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: content }),
+      });
+      const data = await res.json();
+      summary = data.summary;
+    } catch (e) {
+      // fallback: use the old summary logic
+      summary = generateSummary(content);
+    }
 
     const { data, error } = await supabase.from('Story').insert([
       {
