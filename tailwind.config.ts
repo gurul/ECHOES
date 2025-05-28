@@ -21,7 +21,8 @@ const config: Config = {
         'wave-slower': 'wave-slower 12s infinite',
         'wave-fast': 'wave-fast 6s infinite',
         'pulse-slow': 'pulse-slow 4s infinite',
-        'falling-star': 'fallingStar 3s linear infinite'
+        'falling-star': 'fallingStar 3s linear infinite',
+        'glow-pulse': 'glowPulse 2s ease-in-out infinite'
       },
       keyframes: {
         fadeIn: {
@@ -85,6 +86,10 @@ const config: Config = {
             transform: 'translateY(100vh) translateX(100px) rotate(45deg)',
             opacity: '0'
           }
+        },
+        glowPulse: {
+          '0%, 100%': { opacity: '0', transform: 'scale(0.8)' },
+          '50%': { opacity: '1', transform: 'scale(1.2)' }
         }
       },
       perspective: {
@@ -95,7 +100,11 @@ const config: Config = {
         'x-2': 'rotateX(2deg)',
       },
       translate: {
+        'z-2': 'translateZ(2px)',
+        'z-4': 'translateZ(4px)',
+        'z-6': 'translateZ(6px)',
         'z-8': 'translateZ(8px)',
+        'z-12': 'translateZ(12px)',
       },
     },
   },
