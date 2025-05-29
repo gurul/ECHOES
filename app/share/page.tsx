@@ -90,54 +90,54 @@ export default function SharePage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="bg-white rounded-2xl shadow-xl p-8 transform-gpu transition-all duration-300 hover:shadow-2xl">
             <div className="space-y-6">
-              <div>
+          <div>
                 <label htmlFor="title" className="block text-sm font-medium text-black mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2348B1] focus:border-[#2348B1] transition-all duration-200 bg-white/50 backdrop-blur-sm text-black placeholder-gray-500"
-                  placeholder="Give your story a title"
-                  required
-                />
-              </div>
+              placeholder="Give your story a title"
+              required
+            />
+          </div>
 
-              <div>
+          <div>
                 <label htmlFor="content" className="block text-sm font-medium text-black mb-2">
-                  Your Story
-                </label>
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={8}
+              Your Story
+            </label>
+            <textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={8}
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2348B1] focus:border-[#2348B1] transition-all duration-200 bg-white/50 backdrop-blur-sm resize-none text-black placeholder-gray-500"
-                  placeholder="Share your story here..."
-                  required
-                />
-              </div>
+              placeholder="Share your story here..."
+              required
+            />
+          </div>
 
-              <div>
+          <div>
                 <label htmlFor="theme" className="block text-sm font-medium text-black mb-2">
-                  Theme
-                </label>
-                <select
-                  id="theme"
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value as Theme)}
+              Theme
+            </label>
+            <select
+              id="theme"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as Theme)}
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2348B1] focus:border-[#2348B1] transition-all duration-200 bg-white/50 backdrop-blur-sm text-black"
-                  required
-                >
-                  <option value="">Select a theme</option>
-                  {Object.keys(themeGradients).map((theme) => (
-                    <option key={theme} value={theme}>
-                      {theme.charAt(0).toUpperCase() + theme.slice(1)}
-                    </option>
-                  ))}
-                </select>
+              required
+            >
+              <option value="">Select a theme</option>
+              {Object.keys(themeGradients).map((theme) => (
+                <option key={theme} value={theme}>
+                  {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                </option>
+              ))}
+            </select>
               </div>
             </div>
           </div>
