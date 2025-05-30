@@ -14,30 +14,6 @@ interface Story {
   createdAt: string;
 }
 
-function GlowingTitle({ text }: { text: string }) {
-  return (
-    <div className="relative">
-      {text.split('').map((letter, index) => (
-        <span
-          key={index}
-          className="inline-block relative"
-          style={{
-            animationDelay: `${index * 200}ms`,
-          }}
-        >
-          {letter}
-          <span 
-            className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/30 to-blue-400/0 blur-md animate-glow-pulse"
-            style={{
-              animationDelay: `${index * 200}ms`,
-            }}
-          />
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
 

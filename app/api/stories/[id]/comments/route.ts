@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import supabase from '../../../../../supabaseClient';
 
+interface Comment {
+  id: number;
+  content: string;
+  author: string;
+  createdat: string;
+  storyid: number;
+  parentid: number | null;
+}
+
 // Get comments for a story
 export async function GET(
   request: NextRequest,
@@ -24,8 +33,8 @@ export async function GET(
     console.log('Comments fetched successfully:', comments);
 
     // Organize comments into a nested structure
-    const commentMap = new Map();
-    const rootComments: any[] = [];
+    const commentMap = new Map<number, Comment & { replies: Comment[] }>();
+    const rootComments: (Comment & { replies: Comment[] })[] = [];
 
     // First pass: create a map of all comments
     comments.forEach(comment => {
@@ -35,13 +44,15 @@ export async function GET(
     // Second pass: organize into nested structure
     comments.forEach(comment => {
       const commentWithReplies = commentMap.get(comment.id);
-      if (comment.parentid) {
-        const parent = commentMap.get(comment.parentid);
-        if (parent) {
-          parent.replies.push(commentWithReplies);
+      if (commentWithReplies) {
+        if (comment.parentid) {
+          const parent = commentMap.get(comment.parentid);
+          if (parent) {
+            parent.replies.push(commentWithReplies);
+          }
+        } else {
+          rootComments.push(commentWithReplies);
         }
-      } else {
-        rootComments.push(commentWithReplies);
       }
     });
 
