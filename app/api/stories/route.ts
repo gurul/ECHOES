@@ -9,19 +9,22 @@ export async function GET(request: Request) {
       .from('Story')
       .select('*')
       .order('votes', { ascending: false })
-      .order('createdAt', { ascending: false });
+      .order('createdat', { ascending: false });
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
     }
 
     const { data: stories, error } = await query;
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
     return NextResponse.json(stories);
   } catch (error) {
     console.error('Error fetching stories:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch stories' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch stories' },
       { status: 500 }
     );
   }

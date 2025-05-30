@@ -16,8 +16,10 @@ interface Comment {
   id: number;
   content: string;
   author: string;
-  createdAt: string;
-  storyId: number;
+  createdat: string;
+  storyid: number;
+  parentid: number | null;
+  replies?: Comment[];
 }
 
 export default function StoryPage({
@@ -30,6 +32,9 @@ export default function StoryPage({
   const [error, setError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -47,12 +52,18 @@ export default function StoryPage({
     const fetchComments = async () => {
       try {
         const { id } = await params;
+        console.log('Fetching comments for story:', id);
         const response = await fetch(`/api/stories/${id}/comments`);
-        if (!response.ok) throw new Error('Failed to fetch comments');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch comments');
+        }
         const data = await response.json();
+        console.log('Comments fetched successfully:', data);
         setComments(data);
       } catch (err) {
         console.error('Failed to fetch comments:', err);
+        // Don't set error state for comments failure, just log it
       }
     };
 
@@ -85,6 +96,153 @@ export default function StoryPage({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleReply = async (parentId: number) => {
+    setReplyingTo(parentId);
+  };
+
+  const handleSubmitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyContent.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const { id } = await params;
+      const response = await fetch(`/api/stories/${id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          content: replyContent,
+          parentId: replyingTo 
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to submit reply');
+      
+      const reply = await response.json();
+      setComments(prevComments => {
+        const updateComments = (comments: Comment[]): Comment[] => {
+          return comments.map(comment => {
+            if (comment.id === replyingTo) {
+              return {
+                ...comment,
+                replies: [...(comment.replies || []), reply]
+              };
+            }
+            if (comment.replies) {
+              return {
+                ...comment,
+                replies: updateComments(comment.replies)
+              };
+            }
+            return comment;
+          });
+        };
+        return updateComments(prevComments);
+      });
+      setReplyContent('');
+      setReplyingTo(null);
+    } catch (err) {
+      console.error('Failed to submit reply:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const toggleCommentThread = (commentId: number) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+      } else {
+        newSet.add(commentId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderComments = (comments: Comment[], level = 0) => {
+    return comments.map((comment) => (
+      <div key={comment.id} className={`${level > 0 ? 'ml-8 mt-4' : ''}`}>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">
+                {new Date(comment.createdat).toLocaleDateString()}
+              </span>
+            </div>
+            {comment.replies && comment.replies.length > 0 && (
+              <button
+                onClick={() => toggleCommentThread(comment.id)}
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+              >
+                {expandedComments.has(comment.id) ? (
+                  <>
+                    <span>Hide Replies</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <span>Show {comment.replies.length} {comment.replies.length === 1 ? 'Reply' : 'Replies'}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+          <button
+            onClick={() => handleReply(comment.id)}
+            className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+          >
+            Reply
+          </button>
+          {replyingTo === comment.id && (
+            <form onSubmit={handleSubmitReply} className="mt-4">
+              <textarea
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                rows={2}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black"
+                placeholder="Write your reply..."
+                required
+              />
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Posting...' : 'Post Reply'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyingTo(null);
+                    setReplyContent('');
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+        {comment.replies && comment.replies.length > 0 && expandedComments.has(comment.id) && (
+          <div className="mt-4">
+            {renderComments(comment.replies, level + 1)}
+          </div>
+        )}
+      </div>
+    ));
   };
 
   if (error) {
@@ -167,16 +325,7 @@ export default function StoryPage({
 
           {/* Comments List */}
           <div className="space-y-6">
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm text-gray-500">
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
-              </div>
-            ))}
+            {renderComments(comments)}
             {comments.length === 0 && (
               <div className="text-center text-gray-500 py-8">
                 No comments yet. Be the first to share your thoughts!

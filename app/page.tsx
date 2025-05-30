@@ -99,11 +99,15 @@ export default function Home() {
       setIsLoading(true);
       const url = query ? `/api/stories?q=${encodeURIComponent(query)}` : '/api/stories';
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch stories');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch stories');
+      }
       const data = await response.json();
       setStories(data);
-    } catch {
-      setError('Failed to load stories');
+    } catch (error) {
+      console.error('Error fetching stories:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load stories');
     } finally {
       setIsLoading(false);
     }

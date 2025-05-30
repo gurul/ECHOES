@@ -8,18 +8,48 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
+    console.log('Fetching comments for story:', id);
+    
     const { data: comments, error } = await supabase
       .from('Comment')
       .select('*')
-      .eq('storyId', parseInt(id))
-      .order('createdAt', { ascending: false });
+      .eq('storyid', parseInt(id))
+      .order('createdat', { ascending: false });
 
-    if (error) throw error;
-    return NextResponse.json(comments);
+    if (error) {
+      console.error('Supabase error fetching comments:', error);
+      throw error;
+    }
+
+    console.log('Comments fetched successfully:', comments);
+
+    // Organize comments into a nested structure
+    const commentMap = new Map();
+    const rootComments: any[] = [];
+
+    // First pass: create a map of all comments
+    comments.forEach(comment => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    });
+
+    // Second pass: organize into nested structure
+    comments.forEach(comment => {
+      const commentWithReplies = commentMap.get(comment.id);
+      if (comment.parentid) {
+        const parent = commentMap.get(comment.parentid);
+        if (parent) {
+          parent.replies.push(commentWithReplies);
+        }
+      } else {
+        rootComments.push(commentWithReplies);
+      }
+    });
+
+    return NextResponse.json(rootComments);
   } catch (error) {
-    console.error('Error fetching comments:', error);
+    console.error('Error in comments API:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch comments' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch comments' },
       { status: 500 }
     );
   }
@@ -32,7 +62,7 @@ export async function POST(
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
-    const { content } = await request.json();
+    const { content, parentId } = await request.json();
 
     if (!content) {
       return NextResponse.json(
@@ -47,7 +77,8 @@ export async function POST(
         {
           content,
           author: 'Anonymous',
-          storyId: parseInt(id),
+          storyid: parseInt(id),
+          parentid: parentId || null,
         },
       ])
       .select()
