@@ -168,7 +168,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold mb-4 animate-fade-in relative">
             <span className="relative inline-block">
-              <GlowingTitle text="ECHOES" />
+              ECHOES
               <span className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-xl animate-pulse-slow"></span>
             </span>
           </h1>
@@ -196,7 +196,7 @@ export default function Home() {
                     handleSearch();
                   }
                 }}
-                className="w-full px-4 py-3 pl-10 pr-12 rounded-lg text-gray-900 border-2 border-blue-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="w-full px-4 py-3 pl-10 pr-12 rounded-lg text-gray-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white border-0"
                 disabled={isLoading && activeSearchQuery === searchQuery}
               />
               <button
@@ -255,7 +255,7 @@ export default function Home() {
       </div>
 
       {/* Theme Showcase */}
-      <div className="bg-gray-50 py-16">
+      <div className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center animate-fade-in">
             Explore Stories by Theme
