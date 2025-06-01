@@ -39,26 +39,44 @@ function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
   return <span>{count}</span>;
 }
 
-function getSummary(content: string): string {
-  // First try to get the first complete sentence
-  const sentences = content.match(/[^.!?]+[.!?]+/g);
-  if (sentences && sentences.length > 0) {
-    return sentences[0].trim();
+async function getSummary(content: string): Promise<string> {
+  try {
+    const response = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: content }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get AI summary');
+    }
+
+    const { summary } = await response.json();
+    return summary;
+  } catch (error) {
+    console.error('Error getting AI summary:', error);
+    // Fallback to basic summary if AI summarization fails
+    const sentences = content.match(/[^.!?]+[.!?]+/g);
+    if (sentences && sentences.length > 0) {
+      return sentences[0].trim();
+    }
+
+    // If no sentence found, try to get a meaningful chunk
+    const words = content.split(' ');
+    let summary = '';
+    let wordCount = 0;
+    const maxWords = 15; // Limit to roughly one sentence length
+
+    for (const word of words) {
+      if (wordCount >= maxWords) break;
+      summary += word + ' ';
+      wordCount++;
+    }
+
+    return summary.trim() + '...';
   }
-
-  // If no sentence found, try to get a meaningful chunk
-  const words = content.split(' ');
-  let summary = '';
-  let wordCount = 0;
-  const maxWords = 15; // Limit to roughly one sentence length
-
-  for (const word of words) {
-    if (wordCount >= maxWords) break;
-    summary += word + ' ';
-    wordCount++;
-  }
-
-  return summary.trim() + '...';
 }
 
 export default function Home() {
@@ -69,17 +87,25 @@ export default function Home() {
   const [upvotedStories, setUpvotedStories] = useState<Set<number>>(new Set());
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeSearchQuery, setActiveSearchQuery] = useState<string>('');
+  const [storySummaries, setStorySummaries] = useState<Record<number, string>>({});
 
   const fetchStories = async (query: string = '') => {
     try {
       setIsLoading(true);
       const url = query ? `/api/stories?q=${encodeURIComponent(query)}` : '/api/stories';
+      console.log('Fetching stories from:', url);
+      
       const response = await fetch(url);
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Error response:', errorData);
         throw new Error(errorData.error || 'Failed to fetch stories');
       }
+      
       const data = await response.json();
+      console.log('Stories data:', data);
       setStories(data);
     } catch (error) {
       console.error('Error fetching stories:', error);
@@ -92,6 +118,25 @@ export default function Home() {
   useEffect(() => {
     fetchStories(activeSearchQuery);
   }, [activeSearchQuery]);
+
+  useEffect(() => {
+    const generateSummaries = async () => {
+      const newSummaries: Record<number, string> = {};
+      for (const story of stories) {
+        if (!story.summary) {
+          try {
+            const summary = await getSummary(story.content);
+            newSummaries[story.id] = summary;
+          } catch (error) {
+            console.error('Error generating summary for story:', story.id, error);
+          }
+        }
+      }
+      setStorySummaries(newSummaries);
+    };
+
+    generateSummaries();
+  }, [stories]);
 
   const handleSearch = () => {
     setActiveSearchQuery(searchQuery);
@@ -227,7 +272,7 @@ export default function Home() {
               className="group relative inline-flex items-center px-8 py-3 text-[#2348B1] hover:text-[#2348B1] transition-all duration-500"
             >
               <div className="absolute inset-0 bg-white backdrop-blur-sm rounded-lg transform transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"></div>
-              <span className="relative transform transition-all duration-500 group-hover:translate-x-1 font-medium">Share Your Story</span>
+              <span className="relative transform transition-all duration-500 group-hover:translate-x-1 font-medium">Share Story</span>
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/0 via-blue-400/20 to-blue-400/0 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-lg"></div>
             </Link>
           </div>
@@ -315,7 +360,9 @@ export default function Home() {
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/0 via-blue-400/20 to-blue-400/0 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                   <div className="bg-white/90 rounded-lg p-4 flex-grow transform-gpu transition-transform duration-300 group-hover:translate-z-8 relative z-10">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transform-gpu transition-transform duration-300 group-hover:translate-z-4">{story.title}</h3>
-                    <p className="text-gray-700 leading-snug font-medium line-clamp-4 transform-gpu transition-transform duration-300 group-hover:translate-z-2">{story.summary || getSummary(story.content)}</p>
+                    <p className="text-gray-700 leading-snug font-medium line-clamp-4 transform-gpu transition-transform duration-300 group-hover:translate-z-2">
+                      {story.summary || storySummaries[story.id] || 'Loading summary...'}
+                    </p>
                     <div className="mt-4 text-sm font-medium text-gray-900 transform-gpu transition-transform duration-300 group-hover:translate-z-6">
                       Read more →
                     </div>

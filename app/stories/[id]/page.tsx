@@ -9,7 +9,7 @@ interface Story {
   summary?: string;
   theme: string;
   votes: number;
-  createdAt: string;
+  createdat: string;
 }
 
 interface Comment {
@@ -283,7 +283,7 @@ export default function StoryPage({
           <div className="flex items-center gap-4 text-sm text-gray-600 mb-8">
             <span>Theme: {story.theme}</span>
             <span>•</span>
-            <span>{new Date(story.createdAt).toLocaleDateString()}</span>
+            <span>{new Date(story.createdat).toLocaleDateString()}</span>
             <span>•</span>
             <span>{story.votes} votes</span>
           </div>

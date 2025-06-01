@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { text } = await req.json();
+    const { text } = await request.json();
 
     if (!text) {
       return NextResponse.json(
@@ -11,28 +11,29 @@ export async function POST(req: Request) {
       );
     }
 
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ inputs: text })
-      }
-    );
+    // Generate basic summary by taking the first sentence
+    const sentences = text.match(/[^.!?]+[.!?]+/g);
+    if (!sentences || sentences.length === 0) {
+      // If no sentence found, try to get a meaningful chunk
+      const words = text.split(' ');
+      let summary = '';
+      let wordCount = 0;
+      const maxWords = 15; // Limit to roughly one sentence length
 
-    if (!response.ok) {
-      throw new Error('Failed to generate summary');
+      for (const word of words) {
+        if (wordCount >= maxWords) break;
+        summary += word + ' ';
+        wordCount++;
+      }
+
+      return NextResponse.json({ summary: summary.trim() + '...' });
     }
 
-    const data = await response.json();
-    return NextResponse.json({ summary: data[0]?.summary_text || "No summary generated." });
+    return NextResponse.json({ summary: sentences[0].trim() });
   } catch (error) {
-    console.error('Summarization error:', error);
+    console.error('Error generating summary:', error);
     return NextResponse.json(
-      { error: 'Failed to generate summary' },
+      { error: error instanceof Error ? error.message : 'Failed to generate summary' },
       { status: 500 }
     );
   }

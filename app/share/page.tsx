@@ -10,10 +10,12 @@ export default function SharePage() {
   const [content, setContent] = useState('');
   const [theme, setTheme] = useState<Theme>('resilience');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
     try {
       const response = await fetch('/api/stories', {
@@ -24,8 +26,10 @@ export default function SharePage() {
         body: JSON.stringify({ title, content, theme }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to submit story');
+        throw new Error(data.error || 'Failed to submit story');
       }
 
       // Reset form
@@ -37,6 +41,7 @@ export default function SharePage() {
       router.push('/');
     } catch (error) {
       console.error('Error submitting story:', error);
+      setError(error instanceof Error ? error.message : 'Failed to submit story');
     } finally {
       setIsSubmitting(false);
     }
@@ -49,16 +54,10 @@ export default function SharePage() {
         <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold mb-4 animate-fade-in relative">
             <span className="relative inline-block">
-              Share Your Story
+              Share Story
               <span className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-xl animate-pulse-slow"></span>
             </span>
           </h1>
-          <p className="text-xl text-white/90 mb-4 relative">
-            <span className="relative inline-block">
-              Let your voice be heard
-              <span className="absolute -inset-1 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 blur-lg animate-pulse-slow"></span>
-            </span>
-          </p>
           <div className="flex justify-center mb-8">
             <button 
               onClick={() => router.back()}
@@ -87,6 +86,12 @@ export default function SharePage() {
 
       {/* Form Section */}
       <div className="max-w-3xl mx-auto px-4 py-16">
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+            <p className="font-medium">Error submitting story:</p>
+            <p>{error}</p>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="bg-white rounded-2xl shadow-xl p-8 transform-gpu transition-all duration-300 hover:shadow-2xl">
             <div className="space-y-6">
