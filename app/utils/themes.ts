@@ -1,4 +1,4 @@
-export type Theme = 'resilience' | 'love' | 'adventure' | 'wisdom' | 'family' | 'courage';
+export type Theme = '' | 'resilience' | 'love' | 'adventure' | 'wisdom' | 'family' | 'courage';
 
 export const themeGradients: Record<string, string> = {
   resilience: 'from-blue-500 via-indigo-500 to-violet-500',
@@ -9,7 +9,7 @@ export const themeGradients: Record<string, string> = {
   courage: 'from-red-500 via-orange-500 to-amber-500',
 };
 
-export const themeLabels: Record<Theme, string> = {
+export const themeLabels: Record<Exclude<Theme, ''>, string> = {
   resilience: 'Explore Tales of Resilience',
   love: 'Discover Stories of Love',
   adventure: 'Journey Through Adventures',

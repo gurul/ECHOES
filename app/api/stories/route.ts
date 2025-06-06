@@ -91,11 +91,18 @@ export async function POST(request: Request) {
       });
 
       if (!summaryResponse.ok) {
-        console.error('Summary API error:', await summaryResponse.text());
+        const errorText = await summaryResponse.text();
+        console.error('Summary API error:', errorText);
         throw new Error('Failed to generate AI summary');
       }
 
-      const summaryData = await summaryResponse.json();
+      let summaryData;
+      try {
+        summaryData = await summaryResponse.json();
+      } catch (parseError) {
+        console.error('Error parsing summary response:', parseError);
+        throw new Error('Invalid response from summary API');
+      }
 
       if (!summaryData.summary) {
         console.error('No summary in response:', summaryData);
