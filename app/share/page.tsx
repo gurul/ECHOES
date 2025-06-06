@@ -62,26 +62,30 @@ export default function SharePage() {
   const [error, setError] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isListeningTitle, setIsListeningTitle] = useState(false);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [titleRecognition, setTitleRecognition] = useState<SpeechRecognition | null>(null);
 
   const startListening = (isTitle: boolean = false) => {
     if (!('webkitSpeechRecognition' in window)) {
-      setError('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+      setError('Speech recognition is not supported in your browser.');
       return;
     }
 
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    const recognitionInstance = new window.webkitSpeechRecognition();
+    recognitionInstance.continuous = true;
+    recognitionInstance.interimResults = true;
 
-    recognition.onstart = () => {
+    recognitionInstance.onstart = () => {
       if (isTitle) {
         setIsListeningTitle(true);
+        setTitleRecognition(recognitionInstance);
       } else {
         setIsListening(true);
+        setRecognition(recognitionInstance);
       }
     };
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = Array.from(event.results)
         .map((result: SpeechRecognitionResult) => result[0])
         .map((result: SpeechRecognitionAlternative) => result.transcript)
@@ -94,12 +98,14 @@ export default function SharePage() {
       }
     };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
       if (isTitle) {
         setIsListeningTitle(false);
+        setTitleRecognition(null);
       } else {
         setIsListening(false);
+        setRecognition(null);
       }
       if (event.error === 'no-speech') {
         setError('No speech was detected. Please try again.');
@@ -108,21 +114,31 @@ export default function SharePage() {
       }
     };
 
-    recognition.onend = () => {
+    recognitionInstance.onend = () => {
       if (isTitle) {
         setIsListeningTitle(false);
+        setTitleRecognition(null);
       } else {
         setIsListening(false);
+        setRecognition(null);
       }
     };
 
-    recognition.start();
+    recognitionInstance.start();
   };
 
   const stopListening = (isTitle: boolean = false) => {
     if (isTitle) {
+      if (titleRecognition) {
+        titleRecognition.stop();
+        setTitleRecognition(null);
+      }
       setIsListeningTitle(false);
     } else {
+      if (recognition) {
+        recognition.stop();
+        setRecognition(null);
+      }
       setIsListening(false);
     }
   };
