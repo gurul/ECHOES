@@ -190,8 +190,14 @@ export default function SharePage() {
 
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
-            <p className="font-medium">Error submitting story:</p>
-            <p>{error}</p>
+            {error === 'Speech recognition is not supported in your browser.' ? (
+              <p>{error}</p>
+            ) : (
+              <>
+                <p className="font-medium">Error submitting story:</p>
+                <p>{error}</p>
+              </>
+            )}
           </div>
         )}
 
