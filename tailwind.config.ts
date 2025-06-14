@@ -7,6 +7,12 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    fontFamily: {
+      sans: ['var(--font-montserrat)'],
+      montserrat: ['var(--font-montserrat)'],
+      geist: ['var(--font-geist-sans)'],
+      mono: ['var(--font-geist-mono)'],
+    },
     extend: {
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
